@@ -2,7 +2,6 @@ import asyncio
 import os
 import random
 from pyrogram import Client, filters
-from pyrogram.types import Message
 from flask import Flask
 import threading
 import sys
@@ -37,7 +36,7 @@ bots = []
 command_bot = None
 
 print("=" * 60)
-print("🤖 MULTIPLE BOTS AUTO-REACTION SYSTEM (FIXED)")
+print("🤖 MULTIPLE BOTS AUTO-REACTION SYSTEM (FIXED V2)")
 print("=" * 60)
 print(f"Python: {sys.version}")
 print(f"Total Bot Tokens: {len(BOT_TOKENS)}")
@@ -83,8 +82,8 @@ async def add_reactions(message_id, chat_id, reactions_list, bot_count):
                 await msg.react(selected_reactions[i])
                 success += 1
                 await asyncio.sleep(0.3)
-            except:
-                pass
+            except Exception as e:
+                print(f"Reaction error: {e}")
         
         print(f"✅ Added {success}/{actual} reactions")
         return success > 0
@@ -99,11 +98,12 @@ async def main():
         print("❌ No bots initialized!")
         return
     
-    # Don't auto-join - just warn
-    print("\n⚠️ Please manually add all bots to the target group!")
+    print("\n⚠️ IMPORTANT: Manually add all bots to the target group!")
     print(f"   Target Group: {TARGET_GROUP}")
-    print("   Add each bot as a member using 'Add Member' button\n")
+    print(f"   Command Group: {COMMAND_GROUP}")
+    print("   Use 'Add Member' button in Telegram group info\n")
     
+    # Command handlers
     @command_bot.on_message(filters.chat(COMMAND_GROUP) & filters.command("start"))
     async def cmd_start(client, message):
         await message.reply(
@@ -116,7 +116,8 @@ async def main():
             "`.setbots 5`\n"
             "`.react on/off`\n"
             "`.reactnow`\n"
-            "`.settings`"
+            "`.settings`\n"
+            "`.bots`"
         )
     
     @command_bot.on_message(filters.chat(COMMAND_GROUP) & filters.command("setreactions"))
@@ -200,7 +201,7 @@ async def main():
     async def cmd_settings(client, message):
         uid = message.from_user.id
         if uid not in user_settings:
-            await message.reply("No settings configured!")
+            await message.reply("No settings configured! Use `.setreactions` first")
             return
         s = user_settings[uid]
         text = f"**Settings:**\n\n"
@@ -219,7 +220,7 @@ async def main():
                 names.append(f"• @{info.username}")
             except:
                 names.append("• Unknown")
-        text = f"🤖 **Bots:** {len(bots)}\n\n" + "\n".join(names)
+        text = f"🤖 **Active Bots:** {len(bots)}\n\n" + "\n".join(names)
         await message.reply(text)
     
     # Auto-reaction on target group
@@ -242,10 +243,10 @@ async def main():
     print(f"🤖 Bots: {len(bots)}")
     print(f"📌 Commands: {COMMAND_GROUP}")
     print(f"🎯 Reactions: {TARGET_GROUP}")
-    print("\n⚠️ IMPORTANT: Manually add all bots to the target group!")
+    print("\n⚠️ Manually add ALL bots to target group!")
     print("=" * 60)
     
-    # Use idle() instead of run()
+    # Keep bot running
     await asyncio.Event().wait()
 
 if __name__ == "__main__":
