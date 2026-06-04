@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: multi-bot-reaction
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python main.py
+    envVars:
+      - key: API_ID
+        sync: false
+      - key: API_HASH
+        sync: false
+      - key: BOT_TOKENS
+        sync: false
+      - key: COMMAND_GROUP
+        sync: false
+      - key: TARGET_GROUP
+        sync: false
